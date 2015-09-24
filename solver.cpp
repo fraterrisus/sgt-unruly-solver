@@ -63,8 +63,50 @@ Board* read_game() {
   return b;
 }
 
+Board* test_game() {
+  Board *board = new Board(10);
+  board->set_color(0,0,Square::WHITE);
+  board->set_color(1,0,Square::BLACK);
+
+  board->set_color(4,1,Square::WHITE);
+  board->set_color(9,1,Square::WHITE);
+
+  board->set_color(2,2,Square::WHITE);
+  board->set_color(6,2,Square::WHITE);
+  board->set_color(7,2,Square::WHITE);
+
+  board->set_color(0,3,Square::WHITE);
+  board->set_color(2,3,Square::WHITE);
+  board->set_color(6,3,Square::WHITE);
+  board->set_color(9,3,Square::WHITE);
+
+  board->set_color(4,4,Square::WHITE);
+  board->set_color(7,4,Square::BLACK);
+
+  board->set_color(3,5,Square::WHITE);
+  board->set_color(8,5,Square::BLACK);
+
+  board->set_color(6,6,Square::WHITE);
+
+  board->set_color(3,7,Square::BLACK);
+  board->set_color(5,7,Square::BLACK);
+
+  board->set_color(1,8,Square::BLACK);
+  board->set_color(2,8,Square::BLACK);
+  board->set_color(5,8,Square::BLACK);
+  board->set_color(8,8,Square::BLACK);
+  board->set_color(9,8,Square::BLACK);
+
+  board->set_color(2,9,Square::WHITE);
+  board->set_color(8,9,Square::BLACK);
+
+  return board;
+}
+
 int main(int argc, char **argv) {
-  Board *board = read_game();
+  Board *board;
+  //board = read_game();
+  board = test_game();
   if (board == 0) { return 1; }
   cout << board->to_str();
   board->solve();

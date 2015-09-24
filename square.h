@@ -14,6 +14,8 @@ public:
 
   void set(Color);
   Color get();
+  Color get_inverse();
+  bool is_empty();
 
   char to_char();
 };
