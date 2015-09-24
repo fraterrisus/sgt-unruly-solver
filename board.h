@@ -34,7 +34,10 @@ public:
     iterator operator+(int);
     iterator& operator-=(int);
     iterator operator-(int);
+    int operator-(const iterator&);
   };
+
+  typedef bool (Board::*FindFunc)(iterator, iterator);
 
 private:
   Square* board;
@@ -59,7 +62,9 @@ public:
   iterator col_end(int);
 
   bool find_pairs(iterator, iterator);
-  bool solve_by_pairs();
+  bool find_gaps(iterator, iterator);
+  bool find_halves(iterator, iterator);
+  bool solve_by_finder(FindFunc);
   void solve();
 };
 

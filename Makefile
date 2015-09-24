@@ -5,13 +5,11 @@ TARGETS=solver.o board.o board_iterator.o square.o
 
 default: solver
 
-board.o: board.h board.cpp square.o
+board.o: square.h
 
-board_iterator.o: board.h board_iterator.cpp square.o
+board_iterator.o: square.h
 
-solver.o: board.o board_iterator.o
-
-square.o: square.h square.cpp
+solver.o: board.h
 
 solver: $(TARGETS)
 

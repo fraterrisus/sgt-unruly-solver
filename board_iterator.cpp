@@ -40,7 +40,7 @@ Board::iterator& Board::iterator::operator+=(int i) {
 }
 
 Board::iterator Board::iterator::operator+(int i) {
-  Board::iterator tmp = iterator(*this);
+  Board::iterator tmp = *this;
   tmp += i;
   return tmp;
 }
@@ -62,9 +62,16 @@ Board::iterator& Board::iterator::operator-=(int i) {
 }
 
 Board::iterator Board::iterator::operator-(int i) {
-  Board::iterator tmp = iterator(*this);
+  Board::iterator tmp = *this;
   tmp -= i;
   return tmp;
+}
+
+int Board::iterator::operator-(const Board::iterator& rhs) {
+  Board::iterator it = rhs;
+  int dist = 0;
+  while (it != *this) { it++; dist++; }
+  return dist;
 }
 
 bool Board::iterator::operator==(const Board::iterator& rhs) {
@@ -90,3 +97,4 @@ bool Board::iterator::operator<=(const Board::iterator& rhs) {
 bool Board::iterator::operator>=(const Board::iterator& rhs) {
   return (ptr >= rhs.ptr);
 }
+

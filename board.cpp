@@ -85,11 +85,17 @@ Board::iterator Board::col_end(int x) {
 
 bool Board::find_pairs(Board::iterator start, Board::iterator end) {
   bool changes = false;
-  for (Board::iterator it = start; it < (end - 1); it++) {
-    if ((! it->is_empty()) && (it->get() == (it+1)->get())) {
-      Square::Color newcol = it->get_inverse();
-      Board::iterator w = it-1;
-      Board::iterator z = it+2;
+  for (Board::iterator it = start; it < end; it++)
+    if (it->is_empty()) { changes = true; break; }
+  if (!changes) { return false; } // short-circuit
+
+  changes = false;
+  for (Board::iterator x = start; x < (end - 1); x++) {
+    Board::iterator y = x+1;
+    if ((! x->is_empty()) && (x->get() == y->get())) {
+      Square::Color newcol = x->get_inverse();
+      Board::iterator w = x-1;
+      Board::iterator z = x+2;
       if ((w >= start) && (w->is_empty())) { w->set(newcol); changes = true; }
       if ((z <  end  ) && (z->is_empty())) { z->set(newcol); changes = true; }
     }
@@ -97,21 +103,66 @@ bool Board::find_pairs(Board::iterator start, Board::iterator end) {
   return changes;
 }
 
-bool Board::solve_by_pairs() {
+bool Board::find_gaps(Board::iterator start, Board::iterator end) {
+  bool changes = false;
+  for (Board::iterator it = start; it < end; it++)
+    if (it->is_empty()) { changes = true; break; }
+  if (!changes) { return false; } // short-circuit
+
+  changes = false;
+  for (Board::iterator x = start; x < (end - 2); x++) {
+    Board::iterator y = x+1;
+    Board::iterator z = x+2;
+    if (!x->is_empty() && y->is_empty() && !z->is_empty() && (x->get() == z->get())) {
+      //std::cout << "found " << x->to_char() << y->to_char() << z->to_char() << "\n";
+      y->set(x->get_inverse()); changes = true;
+    }
+  }
+  return changes;
+}
+
+bool Board::find_halves(Board::iterator start, Board::iterator end) {
+  std::cout << "find_halves\n";
+  bool changes = false;
+  int count = end - start;
+  int blacks=0, whites=0, nones=0;
+  for (Board::iterator it = start; it < end; it++) {
+    switch(it->get()) {
+      case Square::NONE:
+        nones++; break;
+      case Square::BLACK:
+        blacks++; break;
+      case Square::WHITE:
+        whites++; break;
+    }
+  }
+  if (nones == 0) return false; // short-circuit
+
+  changes = false;
+  Square::Color newcol = Square::NONE;
+  if (blacks == count / 2) newcol = Square::WHITE;
+  if (whites == count / 2) newcol = Square::BLACK;
+  if (newcol != Square::NONE)
+    for (Board::iterator it = start; it < end; it++)
+      if (it->is_empty()) { it->set(newcol); changes = true; }
+  return changes;
+}
+
+bool Board::solve_by_finder(Board::FindFunc ff) {
   bool changes = false;
   for (int x = 0; x < width; x++) {
     Board::iterator start = col_begin(x);
     Board::iterator end = col_end(x);
-    std::cout << x << ": " << line_to_str(start, end) << "\n";
-    changes = find_pairs(start, end) || changes;
-    std::cout << "   " << line_to_str(start, end) << "\n";
+    std::cout << "c" << x << ": " << line_to_str(start, end) << "\n";
+    changes = (this->*ff)(start, end) || changes;
+    std::cout << "    " << line_to_str(start, end) << "\n";
   }
   for (int y = 0; y < height; y++) {
     Board::iterator start = row_begin(y);
     Board::iterator end = row_end(y);
-    std::cout << y << ": " << line_to_str(start, end) << "\n";
-    changes = find_pairs(start, end) || changes;
-    std::cout << "   " << line_to_str(start, end) << "\n";
+    std::cout << "r" << y << ": " << line_to_str(start, end) << "\n";
+    changes = (this->*ff)(start, end) || changes;
+    std::cout << "    " << line_to_str(start, end) << "\n";
   }
   return changes;
 }
@@ -120,7 +171,9 @@ void Board::solve() {
   bool changes = true;
   while (changes) {
     changes = false;
-    changes = solve_by_pairs() || changes;
+    changes = changes || solve_by_finder(&Board::find_pairs);
+    changes = changes || solve_by_finder(&Board::find_gaps);
+    changes = changes || solve_by_finder(&Board::find_halves);
     std::cout << to_str();
   }
 }
