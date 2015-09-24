@@ -5,12 +5,14 @@ Board::iterator::iterator(Square* p, int i) {
   inc = i;
 }
 
-Board::iterator::iterator(const Board::iterator &it) {
-  ptr = it.ptr;
-  inc = it.inc;
+Board::iterator::iterator(const Board::iterator &rhs) {
+  ptr = rhs.ptr;
+  inc = rhs.inc;
 }
 
-Board::iterator::~iterator() {
+Board::iterator& Board::iterator::operator=(const Board::iterator &rhs) {
+  ptr = rhs.ptr;
+  inc = rhs.inc;
 }
 
 Square& Board::iterator::operator*() const {

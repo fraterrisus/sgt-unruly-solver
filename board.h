@@ -16,7 +16,7 @@ public:
   public:
     iterator(const iterator&);
     iterator(Square*, int);
-    ~iterator();
+    //~iterator();
     iterator& operator=(const iterator&);
     iterator& operator++(); //pre-increment
     iterator operator++(int); //post-increment

@@ -105,8 +105,8 @@ Board* test_game() {
 
 int main(int argc, char **argv) {
   Board *board;
-  //board = read_game();
-  board = test_game();
+  board = read_game();
+  //board = test_game();
   if (board == 0) { return 1; }
   cout << board->to_str();
   board->solve();

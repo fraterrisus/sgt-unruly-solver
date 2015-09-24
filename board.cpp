@@ -85,8 +85,7 @@ Board::iterator Board::col_end(int x) {
 
 bool Board::find_pairs(Board::iterator start, Board::iterator end) {
   bool changes = false;
-  Board::iterator it(start);
-  for (; it < (end - 1); it++) {
+  for (Board::iterator it = start; it < (end - 1); it++) {
     if ((! it->is_empty()) && (it->get() == (it+1)->get())) {
       Square::Color newcol = it->get_inverse();
       Board::iterator w = it-1;
