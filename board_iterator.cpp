@@ -1,5 +1,10 @@
 #include "board.h"
 
+Board::iterator::iterator() {
+  ptr = 0;
+  inc = 0;
+}
+
 Board::iterator::iterator(Square* p, int i) {
   ptr = p;
   inc = i;

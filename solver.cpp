@@ -1,6 +1,7 @@
 #include "board.h"
 #include <iostream>
 #include <string>
+#include <chrono>
 
 using namespace std;
 
@@ -105,11 +106,16 @@ Board* test_game() {
 
 int main(int argc, char **argv) {
   Board *board;
+
   board = read_game();
   //board = test_game();
   if (board == 0) { return 1; }
   cout << board->to_str();
+  auto then = std::chrono::high_resolution_clock::now();
   board->solve();
+  auto now = std::chrono::high_resolution_clock::now();
+  long long elapsed_us = std::chrono::duration_cast<std::chrono::microseconds>(now - then).count();
   cout << board->to_str();
+  cout << "Solving time: " << elapsed_us / 100.0 << "ms\n";
   return 0;
 }

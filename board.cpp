@@ -35,13 +35,14 @@ std::string Board::to_str() {
   return rv;
 }
 
-std::string Board::line_to_str(Board::iterator start, Board::iterator end) {
-  std::string rv = "";
-  Board::iterator *it = new Board::iterator(start);
-  for (; *it < end ; (*it)++) {
-    rv = rv + (*it)->to_char();
+bool Board::is_solved() {
+  for (int x = 0; x < width; x++) {
+    if (! fetch_col(x).is_full()) return false;
   }
-  return rv;
+  for (int y = 0; y < height; y++) {
+    if (! fetch_row(y).is_full()) return false;
+  }
+  return true;
 }
 
 /*******************/
@@ -65,6 +66,14 @@ void Board::set_color(int loc, Square::Color val) {
 
 /*******************/
 
+Board::Line Board::fetch_row(int y) {
+  return Board::Line(row_begin(y), row_end(y));
+}
+
+Board::Line Board::fetch_col(int x) {
+  return Board::Line(col_begin(x), col_end(x));
+}
+
 Board::iterator Board::row_begin(int y) {
   return Board::iterator(this->get_square(0,y), 1);
 }
@@ -83,50 +92,65 @@ Board::iterator Board::col_end(int x) {
 
 /*******************/
 
-bool Board::find_pairs(Board::iterator start, Board::iterator end) {
-  bool changes = false;
-  for (Board::iterator it = start; it < end; it++)
-    if (it->is_empty()) { changes = true; break; }
-  if (!changes) { return false; } // short-circuit
+bool Board::brute_force(Board::Line &line) {
+  return false;
+}
 
-  changes = false;
-  for (Board::iterator x = start; x < (end - 1); x++) {
+/* The difference in this method is that it exits as soon as any changes are
+ * made. solve_by_finder() continues iterating over every row and column even
+ * if it makes changes. */
+bool Board::solve_by_brute_force() {
+  for (int x = 0; x < width; x++) {
+    Board::Line col = fetch_col(x);
+    //std::cout << "c" << x << ": " << col->to_str() << "\n";
+    if (brute_force(col)) { return true; }
+    //std::cout << "    " << col->to_str() << "\n";
+  }
+  for (int y = 0; y < height; y++) {
+    Board::Line row = fetch_row(y);
+    //std::cout << "r" << y << ": " << row->to_str() << "\n";
+    if (brute_force(row)) { return true; }
+    //std::cout << "    " << row->to_str() << "\n";
+  }
+  return false;
+}
+
+/*******************/
+
+bool Board::find_pairs(Board::Line &line) {
+  if (line.is_full()) { return false; }
+  bool changes = false;
+  for (Board::iterator x = line.start; x < (line.end - 1); x++) {
     Board::iterator y = x+1;
     if ((! x->is_empty()) && (x->get() == y->get())) {
       Square::Color newcol = x->get_inverse();
       Board::iterator w = x-1;
       Board::iterator z = x+2;
-      if ((w >= start) && (w->is_empty())) { w->set(newcol); changes = true; }
-      if ((z <  end  ) && (z->is_empty())) { z->set(newcol); changes = true; }
+      if ((w >= line.start) && (w->is_empty())) { w->set(newcol); changes = true; }
+      if ((z <  line.end  ) && (z->is_empty())) { z->set(newcol); changes = true; }
     }
   }
   return changes;
 }
 
-bool Board::find_gaps(Board::iterator start, Board::iterator end) {
+bool Board::find_gaps(Board::Line &line) {
+  if (line.is_full()) { return false; }
   bool changes = false;
-  for (Board::iterator it = start; it < end; it++)
-    if (it->is_empty()) { changes = true; break; }
-  if (!changes) { return false; } // short-circuit
-
-  changes = false;
-  for (Board::iterator x = start; x < (end - 2); x++) {
+  for (Board::iterator x = line.start; x < (line.end - 2); x++) {
     Board::iterator y = x+1;
     Board::iterator z = x+2;
     if (!x->is_empty() && y->is_empty() && !z->is_empty() && (x->get() == z->get())) {
-      //std::cout << "found " << x->to_char() << y->to_char() << z->to_char() << "\n";
       y->set(x->get_inverse()); changes = true;
     }
   }
   return changes;
 }
 
-bool Board::find_halves(Board::iterator start, Board::iterator end) {
-  std::cout << "find_halves\n";
+bool Board::find_halves(Board::Line &line) {
   bool changes = false;
-  int count = end - start;
+  int count = line.end - line.start;
   int blacks=0, whites=0, nones=0;
-  for (Board::iterator it = start; it < end; it++) {
+  for (Board::iterator it = line.start; it < line.end; it++) {
     switch(it->get()) {
       case Square::NONE:
         nones++; break;
@@ -143,7 +167,7 @@ bool Board::find_halves(Board::iterator start, Board::iterator end) {
   if (blacks == count / 2) newcol = Square::WHITE;
   if (whites == count / 2) newcol = Square::BLACK;
   if (newcol != Square::NONE)
-    for (Board::iterator it = start; it < end; it++)
+    for (Board::iterator it = line.start; it < line.end; it++)
       if (it->is_empty()) { it->set(newcol); changes = true; }
   return changes;
 }
@@ -151,29 +175,36 @@ bool Board::find_halves(Board::iterator start, Board::iterator end) {
 bool Board::solve_by_finder(Board::FindFunc ff) {
   bool changes = false;
   for (int x = 0; x < width; x++) {
-    Board::iterator start = col_begin(x);
-    Board::iterator end = col_end(x);
-    std::cout << "c" << x << ": " << line_to_str(start, end) << "\n";
-    changes = (this->*ff)(start, end) || changes;
-    std::cout << "    " << line_to_str(start, end) << "\n";
+    Board::Line col = fetch_col(x);
+    //std::cout << "c" << x << ": " << col->to_str() << "\n";
+    changes = (this->*ff)(col) || changes;
+    //std::cout << "    " << col->to_str() << "\n";
   }
   for (int y = 0; y < height; y++) {
-    Board::iterator start = row_begin(y);
-    Board::iterator end = row_end(y);
-    std::cout << "r" << y << ": " << line_to_str(start, end) << "\n";
-    changes = (this->*ff)(start, end) || changes;
-    std::cout << "    " << line_to_str(start, end) << "\n";
+    Board::Line row = fetch_row(y);
+    //std::cout << "r" << y << ": " << row->to_str() << "\n";
+    changes = (this->*ff)(row) || changes;
+    //std::cout << "    " << row->to_str() << "\n";
   }
   return changes;
 }
 
+/*******************/
+
 void Board::solve() {
-  bool changes = true;
-  while (changes) {
-    changes = false;
-    changes = changes || solve_by_finder(&Board::find_pairs);
-    changes = changes || solve_by_finder(&Board::find_gaps);
-    changes = changes || solve_by_finder(&Board::find_halves);
-    std::cout << to_str();
+  bool changes;
+  while (!is_solved()) {
+    changes = true;
+    while (changes) {
+      changes = false;
+      changes = changes || solve_by_finder(&Board::find_pairs);
+      changes = changes || solve_by_finder(&Board::find_gaps);
+      changes = changes || solve_by_finder(&Board::find_halves);
+      //if (changes) std::cout << to_str();
+    }
+    changes = solve_by_brute_force();
+    // Either we're done, or something went really really wrong.
+    if (!changes) { return; }
+    //std::cout << to_str();
   }
 }
