@@ -8,6 +8,7 @@ using namespace std;
 Board* read_game() {
   int h, w;
   char p;
+  std::string gameid;
   cin >> h;
   cin >> p;
   if (p != 'x') {
@@ -25,35 +26,36 @@ Board* read_game() {
     return 0;
   }
 
-  int pos = 0;
+  int pos = -1;
   while (1) {
+    pos++;
     Square::Color color = Square::NONE;
     cin >> p;
+    gameid += p;
     if (cin.eof()) { break; }
     if ((p >= 'a') && (p < 'z')) {
       pos += (p - 'a');
       color = Square::WHITE;
     }
     if (p == 'z') {
-      pos += (p - 'a');
+      pos += (p - 'a') - 1;
     }
     if ((p >= 'A') && (p < 'Z')) {
       pos += (p - 'A');
       color = Square::BLACK;
     }
     if (p == 'Z') {
-      pos += (p - 'A');
+      pos += (p - 'A') - 1;
     }
     //cout << "[" << p << "] (" << pos << ") " << color << "\n";
     if (pos < (h * w)) {
       b->set_color(pos, color);
     }
     if (pos > (h * w)) {
-      cerr << "Format error: game string too long\n";
+      cerr << "Format error: game string " << gameid << " too long\n";
       delete(b);
       return 0;
     }
-    pos++;
   }
   if (pos != (h * w)+1) {
     cerr << "Format error: game string too short\n";
@@ -116,6 +118,6 @@ int main(int argc, char **argv) {
   auto now = std::chrono::high_resolution_clock::now();
   long long elapsed_us = std::chrono::duration_cast<std::chrono::microseconds>(now - then).count();
   cout << board->to_str();
-  cout << "Solving time: " << elapsed_us / 100.0 << "ms\n";
+  cout << "Solving time: " << elapsed_us / 100000.0 << "\n";
   return 0;
 }
