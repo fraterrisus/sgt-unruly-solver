@@ -4,7 +4,7 @@
 class Square {
 
 public:
-  enum Color { NONE, WHITE, BLACK };
+  enum Color { NONE, WHITE, BLACK, DEAD };
 
 private:
   Color value;

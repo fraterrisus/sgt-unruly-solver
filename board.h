@@ -45,7 +45,7 @@ public:
   class Line {
 
   public:
-    iterator start;
+    iterator begin;
     iterator end;
     int datum;
 
@@ -54,11 +54,14 @@ public:
 
     std::string to_str();
     bool is_full();
-    void count_nones();
+    bool is_valid();
+    int count_colors(Square::Color);
+    int count();
 
-    static std::string to_str(iterator, iterator);
-    static bool is_full(iterator, iterator);
-    static int count_nones(iterator, iterator);
+    static std::string to_str(const iterator&, const iterator&);
+    static bool is_full(const iterator&, const iterator&);
+    static int count_colors(const iterator&, const iterator&, Square::Color);
+    static bool ordering(const Line&, const Line&);
   };
 
   typedef bool (Board::*FindFunc)(Line&);
