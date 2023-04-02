@@ -3,7 +3,7 @@ A solver for the game "unruly" from Simon Tatham's puzzle collection.
 
 Runtimes (in ms, over 1000 runs so reported to 3 significant digits)
 
-Board Size | Difficulty | With Heuristics | Brute Force Only
+Board Size | Difficulty | C++, with heuristics | C++, brute force only
 ----- | ------ | ---- | ----
 8x8   | Easy   | 1.78 | 4.53
 8x8   | Normal | 3.37 | 5.43

@@ -2,6 +2,7 @@ package com.hitchhikerprod.unruly;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 public class Solver {
 
@@ -21,6 +22,14 @@ public class Solver {
         final String gameId = getGameId();
         System.out.println(gameId);
         final Board board = Board.fromGameId(gameId);
+        System.out.print(board);
+        System.out.println();
+        List<Square> col = board.getCol(2);
+        for (Square s : col) {
+            System.out.printf("%s ", s.toChar());
+        }
+        System.out.println("\n");
+        col.get(3).set(Square.Value.WHITE);
         System.out.print(board);
     }
 }

@@ -36,4 +36,19 @@ public class Square {
     public void set(Value newValue) {
         this.value = newValue;
     }
+
+    public char toChar() {
+        switch(this.value) {
+            case BLACK -> {
+                return 'x';
+            }
+            case WHITE -> {
+                return 'o';
+            }
+            case CLEAR -> {
+                return '.';
+            }
+        }
+        return ' ';
+    }
 }

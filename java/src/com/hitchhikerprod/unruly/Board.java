@@ -1,6 +1,7 @@
 package com.hitchhikerprod.unruly;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,15 +37,31 @@ public class Board {
         return squares.get(coordinateToIndex(x, y)).get();
     }
 
+    public List<Square> getRow(int y) {
+        final List<Square> row = new ArrayList<>();
+        int index = y * xDim;
+        for (int i = 0; i < xDim; i++) {
+            row.add(squares.get(index));
+            index++;
+        }
+        return Collections.unmodifiableList(row);
+    }
+
+    public List<Square> getCol(int x) {
+        final List<Square> col = new ArrayList<>();
+        int index = x;
+        for (int i = 0; i < yDim; i++) {
+            col.add(squares.get(index));
+            index += xDim;
+        }
+        return Collections.unmodifiableList(col);
+    }
+
     public String toString() {
         StringBuilder sb = new StringBuilder();
         int index = 0;
         for (Square s : squares) {
-            switch(s.get()) {
-                case BLACK -> sb.append("x ");
-                case WHITE -> sb.append("o ");
-                case CLEAR -> sb.append(". ");
-            }
+            sb.append(s.toChar()).append(' ');
             index++;
             if (index % xDim == 0) {
                 sb.append("\n");
