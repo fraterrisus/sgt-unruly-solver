@@ -18,6 +18,7 @@ Board::iterator::iterator(const Board::iterator &rhs) {
 Board::iterator& Board::iterator::operator=(const Board::iterator &rhs) {
   ptr = rhs.ptr;
   inc = rhs.inc;
+  return *this;
 }
 
 Square& Board::iterator::operator*() const {
