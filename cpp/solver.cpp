@@ -118,6 +118,6 @@ int main(int argc, char **argv) {
   auto now = std::chrono::high_resolution_clock::now();
   long long elapsed_us = std::chrono::duration_cast<std::chrono::microseconds>(now - then).count();
   cout << board->to_str();
-  cout << "Solving time: " << elapsed_us / 100000.0 << "\n";
+  cout << "Solving time: " << elapsed_us / 100000.0 << " s\n";
   return 0;
 }
