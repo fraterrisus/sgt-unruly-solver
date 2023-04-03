@@ -37,6 +37,27 @@ public class Square {
         this.value = newValue;
     }
 
+    public boolean isFilled() {
+        return value != Value.CLEAR;
+    }
+
+    public Value inverted() {
+        return this.value.invert();
+    }
+
+    public void invert() {
+        this.value = this.value.invert();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Square that) {
+            return this.get() == that.get();
+        } else {
+            return false;
+        }
+    }
+
     public char toChar() {
         switch(this.value) {
             case BLACK -> {
@@ -50,5 +71,9 @@ public class Square {
             }
         }
         return ' ';
+    }
+
+    public String toString() {
+        return this.value.toString();
     }
 }

@@ -10,14 +10,44 @@ public class Board {
     private static final Pattern GAME_ID_REGEX = Pattern.compile("^(\\d+)x(\\d+)([a-z]?):([a-zA-Z]+)\\s*$");
 
     private final List<Square> squares;
-    private final int xDim;
-    private final int yDim;
+    public final int xDim;
+    public final int yDim;
 
     public Board(int xDim, int yDim) {
         this.xDim = xDim;
         this.yDim = yDim;
         this.squares = new ArrayList<>();
         for (int i = 0 ; i < xDim * yDim; i++) { squares.add(new Square()); }
+    }
+
+    public Board copy() {
+        final Board newBoard = new Board(this.xDim, this.yDim);
+        int i = 0;
+        for (Square oldSquare : this.squares) {
+            newBoard.squares.set(i, new Square(oldSquare.get()));
+            i++;
+        }
+        return newBoard;
+    }
+
+    public boolean isSolved() {
+        return this.squares.stream().allMatch(Square::isFilled);
+    }
+
+    public boolean isValid() {
+        for (int y = 0; y < yDim; y++) {
+            for (int x = 0; x < xDim; x++) {
+                final Square.Value me = get(x,y);
+                if (me == Square.Value.CLEAR) continue;
+                try {
+                    if ((me == get(x + 1, y)) && (me == (get(x + 2, y)))) return false;
+                } catch (IndexOutOfBoundsException ignored) {}
+                try {
+                    if ((me == get(x, y + 1)) && (me == (get(x, y + 2)))) return false;
+                } catch (IndexOutOfBoundsException ignored) {}
+            }
+        }
+        return true;
     }
 
     private int coordinateToIndex(int x, int y) {
