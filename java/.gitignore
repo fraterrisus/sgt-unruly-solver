@@ -1,3 +1,5 @@
 lib/
 out/
 *.iml
+*.jar
+times
