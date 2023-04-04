@@ -54,7 +54,7 @@ public class Board {
         final int index = (y * xDim) + x;
         if ((index < 0) || (index > (xDim * yDim))) {
             final String message = "Coordinate (" + x + "," + y + ") is out of bounds";
-            throw new IllegalArgumentException(message);
+            throw new IndexOutOfBoundsException(message);
         }
         return index;
     }
@@ -123,7 +123,7 @@ public class Board {
                 index += o - 96;
                 newColor = Square.Value.WHITE;
             }
-            if (index == xDim * yDim) { return newBoard; }
+            if (index >= xDim * yDim) { return newBoard; }
             newBoard.squares.get(index).set(newColor);
         }
         throw new RuntimeException("Game ID string didn't properly terminate");

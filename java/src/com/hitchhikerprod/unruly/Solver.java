@@ -1,14 +1,20 @@
 package com.hitchhikerprod.unruly;
 
-import com.hitchhikerprod.unruly.solvers.*;
+import com.hitchhikerprod.unruly.solvers.BoardStrategy;
+import com.hitchhikerprod.unruly.solvers.ByGaps;
+import com.hitchhikerprod.unruly.solvers.ByHalves;
+import com.hitchhikerprod.unruly.solvers.ByPairs;
+import com.hitchhikerprod.unruly.solvers.ByPermutations;
+import com.hitchhikerprod.unruly.solvers.RowStrategy;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
-import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.LongSummaryStatistics;
+import java.util.stream.Collectors;
 
 public class Solver {
 
@@ -77,21 +83,47 @@ public class Solver {
         }
     }
 
-    public static void main(String[] args) {
-        final String gameId = getGameId("30x30");
-        System.out.println(gameId);
-        final Board board = Board.fromGameId(gameId);
-        long solveTimeUS = 0L;
-        int numTrials = 100;
-
-        for (int i = 0; i < numTrials; i++) {
-            final Solver solver = new Solver(board);
-            final Instant startTime = Instant.now();
-            solver.solve();
-            final Instant endTime = Instant.now();
-            solveTimeUS += startTime.until(endTime, ChronoUnit.MICROS);
+    public static void main(String[] argv) {
+        final String gameId;
+        try {
+            gameId = new String(System.in.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
-        System.out.printf("Solved in %.3f ms\n", (double)solveTimeUS / 1000.0);
+        final Instant startTime = Instant.now();
+
+        final Board board = Board.fromGameId(gameId);
+        final Solver solver = new Solver(board);
+        solver.solve();
+
+        final Instant endTime = Instant.now();
+        System.out.printf("Solve time: %.6f s\n", startTime.until(endTime, ChronoUnit.MICROS) / 1000000.0);
+    }
+
+    public static void speedtest() {
+        int numTrials = 1000;
+
+        List<Long> solveTimes = new LinkedList<>();
+
+        System.out.print("   Size      min    avg    max  (us)\n");
+        for (String diff : List.of("8x8de", "8x8dn", "10x10de", "10x10dn", "14x14de", "14x14dn")) {
+            for (int i = 0; i < numTrials; i++) {
+                final String gameId = getGameId(diff);
+
+                final Instant startTime = Instant.now();
+
+                final Board board = Board.fromGameId(gameId);
+                final Solver solver = new Solver(board);
+                solver.solve();
+
+                final Instant endTime = Instant.now();
+                solveTimes.add(startTime.until(endTime, ChronoUnit.MICROS));
+            }
+
+            LongSummaryStatistics stats = solveTimes.stream().collect(Collectors.summarizingLong(x -> x));
+
+            System.out.printf("%8s  %6d  %6.1f  %6d\n", diff, stats.getMin(), stats.getAverage(), stats.getMax());
+        }
     }
 }

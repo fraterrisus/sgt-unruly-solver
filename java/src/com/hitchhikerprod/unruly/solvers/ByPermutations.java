@@ -61,10 +61,11 @@ public class ByPermutations implements BoardStrategy {
         final List<BitSet> validPerms = new ArrayList<>();
         for (BitSet bs : perms) {
             bs.stream().forEach(idx -> squares.get(clearIndices.get(idx)).set(Square.Value.BLACK));
-            System.out.println(board);
+            //System.out.println(board);
             if (board.isValid()) validPerms.add(bs);
             clearIndices.forEach(idx -> squares.get(idx).set(Square.Value.WHITE));
         }
+        if (validPerms.isEmpty()) return false;
 
         /* Now we need to reduce the "validPerms" to only the bits that are the same in every valid permutation, i.e.
          * where all perms are WHITE or all perms are BLACK. Anything where two valid permutations differ is a square

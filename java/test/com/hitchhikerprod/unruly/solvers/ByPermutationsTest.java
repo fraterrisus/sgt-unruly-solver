@@ -17,6 +17,6 @@ class ByPermutationsTest {
         input.set(2, 2, Square.Value.BLACK);
         final ByPermutations uut = new ByPermutations();
         final Board newBoard = uut.solve(input);
-        System.out.println(newBoard);
+        // System.out.println(newBoard);
     }
 }
