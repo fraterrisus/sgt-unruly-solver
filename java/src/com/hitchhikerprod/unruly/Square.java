@@ -17,6 +17,15 @@ public class Square {
             }
             return null;
         }
+
+        public char toChar() {
+            return switch (this) {
+                case BLACK -> 'x';
+                case WHITE -> 'o';
+                case CLEAR -> '.';
+                default -> ' ';
+            };
+        }
     }
 
     private Value value;
@@ -59,18 +68,7 @@ public class Square {
     }
 
     public char toChar() {
-        switch(this.value) {
-            case BLACK -> {
-                return 'x';
-            }
-            case WHITE -> {
-                return 'o';
-            }
-            case CLEAR -> {
-                return '.';
-            }
-        }
-        return ' ';
+        return this.value.toChar();
     }
 
     public String toString() {

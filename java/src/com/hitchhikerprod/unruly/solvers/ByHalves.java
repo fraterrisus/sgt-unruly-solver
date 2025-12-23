@@ -11,6 +11,7 @@ public class ByHalves implements RowStrategy {
         boolean updates = false;
         final Map<Square.Value, List<Square>> partition = row.stream().collect(Collectors.groupingBy(Square::get));
         final List<Square> clears = partition.getOrDefault(Square.Value.CLEAR, List.of());
+        if (clears.isEmpty()) return false;
         if (partition.getOrDefault(Square.Value.BLACK, List.of()).size() == row.size() / 2) {
             updates = ! clears.isEmpty();
             clears.forEach(s -> s.set(Square.Value.WHITE));

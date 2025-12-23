@@ -3,42 +3,41 @@ A solver for the game `unruly` from [Simon Tatham's puzzle collection.](https://
 
 Results are in ms and are collected over 1,000 runs (of different puzzles), so they're reported out to 3 significant figures.
 
+Last updated 2025-12-23.
+
 ### C++
 
 | Board Size | Difficulty |  Avg |
 |------------|------------|-----:|
-| 8x8        | Easy       | 1.08 |
-| 8x8        | Normal     | 1.98 |
-| 10x10      | Easy       | 2.17 |
-| 10x10      | Normal     | 4.46 |
-| 14x14      | Easy       | 6.71 |
-| 14x14      | Normal     | 13.8 |
+| 10x10      | Easy       | 2.24 |
+| 10x10      | Normal     | 4.27 |
+| 14x14      | Easy       | 6.30 |
+| 14x14      | Normal     | 13.4 |
+| 20x20      | Easy       | 18.6 |
+| 20x20      | Normal     | 44.1 |
 
 ### Java
 
-| Board Size | Difficulty | Avg (with JIT) | Avg (one run) |
-|------------|------------|---------------:|--------------:|
-| 8x8        | Easy       |          0.349 |          22.8 |
-| 8x8        | Normal     |          0.374 |          33.6 |
-| 10x10      | Easy       |          0.369 |          25.7 |
-| 10x10      | Normal     |          0.406 |          37.2 |
-| 14x14      | Easy       |          0.508 |          31.3 |
-| 14x14      | Normal     |          0.822 |          46.8 |
-
-On a hunch, I tried this solver two ways. The `with JIT` column reflects a `Main` class that runs a single process 
-that shells out to `sgt-unruly` to generate a puzzle, parses the board, and creates a new `Solver` object 1,000 times.
-(The time to generate the puzzle is not counted.) This allows the JITter to cache the bytecode, which I think reflects
+In order to allow the JITter to do its work, my speed-test function runs 1,000 loop iterations at each problem size 
+that shell out to `sgt-unruly` to generate a puzzle, parse the board, create a new `Solver` object, and run it to 
+completion. (The time to generate the puzzle is not counted.) In order to allow the JITter to cache the bytecode, I 
+also run 1,000 iterations but don't capture the runtime before I start the actual time trial. I think this reflects 
 a more accurate sense of how fast the solver is.
 
-The `one run` column, on the other hand, works the same way as the C++ solver: a shell script calls `sgt-unruly` and
-pipes the output into the solver (in this case, `java -jar ./solver.jar`). You wouldn't expect the JITter to have
-nearly as much impact, and in fact the times here are _orders of magnitude_ worse. I validated this by looking at the 
-`max` value collected during the `with JIT` run, and got similar results – and it's always the _first_ run that's the
-slowest.
+| Board Size | Difficulty | Old solver | New solver |
+|------------|------------|-----------:|-----------:|
+| 10x10      | Easy       |      0.384 |      0.159 |
+| 10x10      | Normal     |      0.502 |      0.303 |
+| 14x14      | Easy       |      0.700 |      0.377 |
+| 14x14      | Normal     |       1.53 |      0.779 |
+| 20x20      | Easy       |       1.63 |      0.986 |
+| 20x20      | Normal     |       17.4 |       2.77 |
 
 It is kind of cool to see how the Easy puzzles can be solved entirely with heuristics, but when the brute-force solver
-kicks in on the Hard puzzles, the solve time jumps. There's probably some optimization that could be done there,
-especially in terms of memory (the speculative `Board` creation is pretty foul).
+kicks in on the Hard puzzles, the solve time jumps. The new solver is more memory-optimized in that it doesn't 
+speculatively create and destroy tons of new Board objects, it makes use of worklists instead of starting over with new
+iterations, and the permutation solver uses recursion to generate options (which allows it to do more 
+branch-and-bound work, instead of generating everything, filtering down, and then testing). 
 
 ### Ruby
 

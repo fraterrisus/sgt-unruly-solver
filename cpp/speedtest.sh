@@ -1,6 +1,6 @@
 TIMES=1000
 
-for BOARD in "8x8de" "8x8dn" "10x10de" "10x10dn" "14x14de" "14x14dn"
+for BOARD in "10x10de" "10x10dn" "14x14de" "14x14dn" "20x20de" "20x20dn"
 do
   rm -f times
   i=0

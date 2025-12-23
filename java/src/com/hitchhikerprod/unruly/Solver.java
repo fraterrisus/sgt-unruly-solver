@@ -1,9 +1,11 @@
 package com.hitchhikerprod.unruly;
 
 import com.hitchhikerprod.unruly.solvers.BoardStrategy;
+import com.hitchhikerprod.unruly.solvers.ByClear;
 import com.hitchhikerprod.unruly.solvers.ByGaps;
 import com.hitchhikerprod.unruly.solvers.ByHalves;
 import com.hitchhikerprod.unruly.solvers.ByPairs;
+import com.hitchhikerprod.unruly.solvers.ByPerms;
 import com.hitchhikerprod.unruly.solvers.ByPermutations;
 import com.hitchhikerprod.unruly.solvers.RowStrategy;
 
@@ -49,7 +51,35 @@ public class Solver {
             updates = runBoardSolvers();
         }
 
-        //System.out.println(board);
+//        System.out.println(board);
+    }
+
+    public void solve2() {
+        final ByClear byClear = new ByClear(board);
+        final ByHalves byHalves = new ByHalves();
+        final ByPerms byPerms = new ByPerms(board);
+
+        boolean updates = true;
+        while (updates) {
+//            System.out.println(board);
+
+            updates = byClear.solve();
+            if (updates) continue;
+
+            for (int x = 0; x < board.xDim; x++) {
+                final List<Square> col = board.getCol(x);
+                updates |= byHalves.solve(col);
+            }
+            for (int y = 0; y < board.yDim; y++) {
+                final List<Square> row = board.getRow(y);
+                updates |= byHalves.solve(row);
+            }
+            if (updates) continue;
+
+            updates = byPerms.solve();
+        }
+
+//        System.out.println(board);
     }
 
     private boolean runRowSolvers(List<Square> row) {
@@ -83,7 +113,7 @@ public class Solver {
         }
     }
 
-    public static void main(String[] argv) {
+/*    public static void main(String[] argv) {
         final String gameId;
         try {
             gameId = new String(System.in.readAllBytes(), StandardCharsets.UTF_8);
@@ -91,23 +121,43 @@ public class Solver {
             throw new RuntimeException(e);
         }
 
-        final Instant startTime = Instant.now();
+        Instant startTime, endTime;
+        Board board;
+        Solver solver;
 
-        final Board board = Board.fromGameId(gameId);
-        final Solver solver = new Solver(board);
+        startTime = Instant.now();
+        board = Board.fromGameId(gameId);
+        solver = new Solver(board);
         solver.solve();
+        endTime = Instant.now();
+        System.out.printf("Solve1 time: %.6f s\n", startTime.until(endTime, ChronoUnit.MICROS) / 1000000.0);
 
-        final Instant endTime = Instant.now();
-        System.out.printf("Solve time: %.6f s\n", startTime.until(endTime, ChronoUnit.MICROS) / 1000000.0);
-    }
+        startTime = Instant.now();
+        board = Board.fromGameId(gameId);
+        solver = new Solver(board);
+        solver.solve2();
+        endTime = Instant.now();
+        System.out.printf("Solve2 time: %.6f s\n", startTime.until(endTime, ChronoUnit.MICROS) / 1000000.0);
+    }*/
 
-    public static void speedtest() {
+    public static void main(String[] args) {
         int numTrials = 1000;
+
+        // Prime the pump (well, the JITter, really)
+        for (int i = 0; i < numTrials; i++) {
+            final String gameId = getGameId("10x10de");
+
+            final Board board = Board.fromGameId(gameId);
+            final Solver solver = new Solver(board);
+            solver.solve2();
+        }
 
         List<Long> solveTimes = new LinkedList<>();
 
-        System.out.print("   Size      min    avg    max  (us)\n");
-        for (String diff : List.of("8x8de", "8x8dn", "10x10de", "10x10dn", "14x14de", "14x14dn")) {
+        System.out.print("   Size      min       avg       max  (us)\n");
+        for (String diff : List.of("10x10de", "10x10dn", "14x14de", "14x14dn", "20x20de", "20x20dn")) {
+            solveTimes.clear();
+
             for (int i = 0; i < numTrials; i++) {
                 final String gameId = getGameId(diff);
 
@@ -121,9 +171,9 @@ public class Solver {
                 solveTimes.add(startTime.until(endTime, ChronoUnit.MICROS));
             }
 
-            LongSummaryStatistics stats = solveTimes.stream().collect(Collectors.summarizingLong(x -> x));
+            final LongSummaryStatistics stats = solveTimes.stream().collect(Collectors.summarizingLong(x -> x));
 
-            System.out.printf("%8s  %6d  %6.1f  %6d\n", diff, stats.getMin(), stats.getAverage(), stats.getMax());
+            System.out.printf("%8s  %6d  %8.1f  %8d\n", diff, stats.getMin(), stats.getAverage(), stats.getMax());
         }
     }
 }

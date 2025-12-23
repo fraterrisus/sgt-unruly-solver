@@ -2,7 +2,9 @@ package com.hitchhikerprod.unruly;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -60,6 +62,8 @@ public class Board {
     }
 
     public void set(int x, int y, Square.Value value) {
+        if (value == null) return;
+//        System.out.format("Setting (%d,%d) = %s\n", x, y, value.toString());
         squares.get(coordinateToIndex(x, y)).set(value);
     }
 
@@ -127,5 +131,30 @@ public class Board {
             newBoard.squares.get(index).set(newColor);
         }
         throw new RuntimeException("Game ID string didn't properly terminate");
+    }
+
+    public Iterable<Square> getRowIterator(int row) {
+        return () -> new RowIterator(row);
+    }
+
+    public class RowIterator implements Iterator<Square> {
+        private final int y;
+        private int x;
+
+        public RowIterator(int row) {
+            this.y = row;
+            this.x = 0;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return (this.x < xDim);
+        }
+
+        @Override
+        public Square next() {
+            if (this.x >= xDim) throw new NoSuchElementException();
+            return squares.get(coordinateToIndex(this.x++, this.y));
+        }
     }
 }
